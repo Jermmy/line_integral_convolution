@@ -1,1 +1,2 @@
-# line_integral_convolution
+# Line Integral Convolution
+A simple implementation of B. Cabral, et al, "Imaging Vector Fields Using Line Integral Convolution".

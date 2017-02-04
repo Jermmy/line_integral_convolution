@@ -31,6 +31,7 @@ private:
 private:
     void makeWhiteNoise(int row, int col);
     void genBoxFilterLUT(int size);
+    Mat normalizeVect(const Mat &pVect);
     Mat flowImagingLIC(const Mat &pVectr, float krnlen);
 public:
     Lic();
@@ -55,7 +56,29 @@ Mat Lic::showLIC(const cv::Mat &pVectr) {
     
     imwrite("white_noise.jpg", pNoise);
     
-    return flowImagingLIC(pVectr, LOWPASS_FILTER_LENGTH);
+    Mat normVect = normalizeVect(pVectr);
+    
+    return flowImagingLIC(normVect, LOWPASS_FILTER_LENGTH);
+}
+
+Mat Lic::normalizeVect(const cv::Mat &pVect) {
+    assert(pVect.type() == CV_32FC2);
+    int row = pVect.rows, col = pVect.cols;
+    Mat ret(row, col, CV_32FC2);
+    float vcMag = 0.0f, scale = 0.0f, vecX = 0.0f, vecY = 0.0f;
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            vecX = pVect.at<Vec2f>(i, j)[0];
+            vecY = pVect.at<Vec2f>(i, j)[1];
+            vcMag = float(sqrt(vecX*vecX + vecY*vecY));
+            scale = (vcMag < 0.001f) ? 0.0f : 1.0f / vcMag;
+            vecX *= scale;
+            vecY *= scale;
+            ret.at<Vec2f>(i, j)[0] = vecX;
+            ret.at<Vec2f>(i, j)[1] = vecY;
+        }
+    }
+    return ret;
 }
 
 
@@ -80,6 +103,8 @@ void Lic::makeWhiteNoise(int row, int col) {
 }
 
 Mat Lic::flowImagingLIC(const cv::Mat &pVectr, float krnlen) {
+    assert(pVectr.type() == CV_32FC2);
+    
     int row = pVectr.rows, col = pVectr.cols;
     
     Mat pImage(row, col, CV_8U, Scalar(0));
@@ -197,10 +222,6 @@ Mat Lic::flowImagingLIC(const cv::Mat &pVectr, float krnlen) {
     return pImage;
     
 }
-
-
-
-
 
 
 #endif /* lic_hpp */

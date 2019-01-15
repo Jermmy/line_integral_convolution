@@ -54,7 +54,7 @@ Mat Lic::showLIC(const cv::Mat &pVectr) {
     int row = pVectr.rows, col = pVectr.cols;
     makeWhiteNoise(row, col);
     
-    imwrite("white_noise.jpg", pNoise);
+    // imwrite("white_noise.jpg", pNoise);
     
     Mat normVect = normalizeVect(pVectr);
     
